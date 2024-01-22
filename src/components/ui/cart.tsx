@@ -9,6 +9,7 @@ import { ScrollArea } from "./scroll-area";
 import { Button } from "./button";
 import { createCheckout } from "@/actions/checkout";
 import { loadStripe } from "@stripe/stripe-js";
+import { SheetHeader } from "./sheet";
 
 const Cart = () => {
   const { products, subtotal, total, totalDiscount } = useContext(CartContext);
@@ -25,13 +26,15 @@ const Cart = () => {
 
   return (
     <div className="flex h-full flex-col gap-8">
-      <Badge
-        className="w-fit gap-1 border-2 border-primary px-3 py-[0.375rem] text-base uppercase"
-        variant={"outline"}
-      >
-        <ShoppingCartIcon size={16} />
-        Carrinho
-      </Badge>
+      <SheetHeader>
+        <Badge
+          className="w-fit gap-1 border-2 border-primary px-3 py-[0.375rem] text-base uppercase"
+          variant={"outline"}
+        >
+          <ShoppingCartIcon size={16} />
+          Carrinho
+        </Badge>
+      </SheetHeader>
 
       <div className="flex h-full max-h-full flex-col gap-5 overflow-hidden">
         <ScrollArea className="h-full">
