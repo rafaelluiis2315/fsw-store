@@ -60,6 +60,8 @@ const Menu = () => {
         )}
 
         <MenuItem isClose title="Início" type="home" href="/" />
+        
+        <MenuItem isClose title="Meus Pedidos" type="my_orders" href="/orders"/>
 
         <MenuItem isClose title="Ofertas" type="deals" href="/deals" />
 
