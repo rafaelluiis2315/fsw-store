@@ -1,4 +1,4 @@
-import { ShapesIcon, ShoppingCartIcon } from "lucide-react";
+import { ShoppingCartIcon } from "lucide-react";
 import { Badge } from "./badge";
 import { useContext } from "react";
 import { CartContext } from "@/providers/cart";
@@ -9,12 +9,25 @@ import { ScrollArea } from "./scroll-area";
 import { Button } from "./button";
 import { createCheckout } from "@/actions/checkout";
 import { loadStripe } from "@stripe/stripe-js";
+import { SheetHeader } from "./sheet";
+import { useSession } from "next-auth/react";
+import { createOrder } from "@/actions/order";
+import { User } from "@prisma/client";
 
 const Cart = () => {
+  const { data } = useSession();
+
   const { products, subtotal, total, totalDiscount } = useContext(CartContext);
 
   const handleFinishPurchaseClick = async () => {
-    const checkout = await createCheckout(products);
+    if(!data?.user){
+      
+      return;
+    }
+
+    const order = await createOrder(products, (data?.user as User).id);
+
+    const checkout = await createCheckout(products, order.id);
 
     const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
 
@@ -23,15 +36,18 @@ const Cart = () => {
     });
   };
 
+
   return (
     <div className="flex h-full flex-col gap-8">
-      <Badge
-        className="w-fit gap-1 border-2 border-primary px-3 py-[0.375rem] text-base uppercase"
-        variant={"outline"}
-      >
-        <ShoppingCartIcon size={16} />
-        Carrinho
-      </Badge>
+      <SheetHeader>
+        <Badge
+          className="w-fit gap-1 border-2 border-primary px-3 py-[0.375rem] text-base uppercase"
+          variant={"outline"}
+        >
+          <ShoppingCartIcon size={16} />
+          Carrinho
+        </Badge>
+      </SheetHeader>
 
       <div className="flex h-full max-h-full flex-col gap-5 overflow-hidden">
         <ScrollArea className="h-full">
