@@ -13,7 +13,7 @@ const ProductItem = ({ product, className }: ProductItemProps) => {
   return (
     <Link
       href={`/product/${product.slug}`}
-      className={cn("flex min-w-[156px] flex-col gap-4", className)}
+      className={cn("flex min-w-[9.75rem] flex-col gap-4", className)}
     >
       <div className="relative flex aspect-square w-full items-center justify-center rounded-lg bg-accent">
         <Image
