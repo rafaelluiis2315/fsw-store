@@ -6,9 +6,9 @@ import { getServerSession } from "next-auth";
 import OrderItem from "./components/order-item";
 
 const OrdersPage = async () => {
-  const user = getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
 
-  if (!user) {
+  if (!session || !session.user) {
     return (
       <p className="text-red h-auto w-auto text-center text-xl">
         Access Denied
@@ -18,7 +18,7 @@ const OrdersPage = async () => {
 
   const orders = await prismaClient.order.findMany({
     where: {
-      userId: (user as any).id,
+      userId: session.user.id,
     },
     include: {
       orderProducts: {
