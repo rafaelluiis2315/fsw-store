@@ -20,8 +20,7 @@ const Cart = () => {
   const { products, subtotal, total, totalDiscount } = useContext(CartContext);
 
   const handleFinishPurchaseClick = async () => {
-    if(!data?.user){
-      
+    if (!data?.user) {
       return;
     }
 
@@ -36,14 +35,10 @@ const Cart = () => {
     });
   };
 
-
   return (
     <div className="flex h-full flex-col gap-8">
       <SheetHeader>
-        <Badge
-          className="w-fit gap-1 border-2 border-primary px-3 py-[0.375rem] text-base uppercase"
-          variant={"outline"}
-        >
+        <Badge variant="heading">
           <ShoppingCartIcon size={16} />
           Carrinho
         </Badge>

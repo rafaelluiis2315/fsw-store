@@ -6,19 +6,20 @@ import { getServerSession } from "next-auth";
 import OrderItem from "./components/order-item";
 
 const OrdersPage = async () => {
-  const user = getServerSession(authOptions);
+  const session = await getServerSession(authOptions);
 
-  if (!user) {
+  if (!session || !session.user) {
     return (
-      <p className="text-red h-auto w-auto text-center text-xl">
-        Access Denied
-      </p>
+      <div className="flex h-full flex-col items-center justify-center gap-2 p-5">
+        <h2 className="font-bold">Acesso Negado!</h2>
+        <p className="text-sm opacity-60">Faça login para ver seus pedidos</p>
+      </div>
     );
   }
 
   const orders = await prismaClient.order.findMany({
     where: {
-      userId: (user as any).id,
+      userId: session.user.id,
     },
     include: {
       orderProducts: {
@@ -31,10 +32,7 @@ const OrdersPage = async () => {
 
   return (
     <div className="p-5">
-      <Badge
-        className="w-fit gap-1 border-2 border-primary px-3 py-[0.375rem] text-base uppercase"
-        variant="outline"
-      >
+      <Badge variant="heading">
         <PackageSearchIcon size={16} />
         Meus Pedidos
       </Badge>

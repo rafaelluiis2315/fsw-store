@@ -2,10 +2,7 @@
 const nextConfig = {
   images: {
     domains: ["fsw-store-rafa.s3.sa-east-1.amazonaws.com"],
-  },
-  experimental: {
-    serverActions: true,
-  },
+  }
 };
 
 module.exports = nextConfig;
