@@ -10,9 +10,10 @@ const OrdersPage = async () => {
 
   if (!session || !session.user) {
     return (
-      <p className="text-red h-auto w-auto text-center text-xl">
-        Access Denied
-      </p>
+      <div className="flex h-full flex-col items-center justify-center gap-2 p-5">
+        <h2 className="font-bold">Acesso Negado!</h2>
+        <p className="text-sm opacity-60">Faça login para ver seus pedidos</p>
+      </div>
     );
   }
 
