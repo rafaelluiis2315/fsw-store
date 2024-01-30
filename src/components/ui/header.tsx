@@ -46,14 +46,14 @@ const Header = () => {
           <Button size="icon" variant="outline" className="relative">
             {cartQuantityItem > 0 && (
               <Badge className="absolute right-[calc(-1.60rem/2)] top-[calc(-1.60rem/2)] rounded-lg text-sm font-bold ">
-                {products.length}
+                {cartQuantityItem}
               </Badge>
             )}
             <ShoppingCartIcon />
           </Button>
         </SheetTrigger>
 
-        <SheetContent className="w-[21.875rem]">
+        <SheetContent className="w-[21.875rem] lg:w-[37.5rem] lg:max-w-[37.5rem]">
           <Cart />
         </SheetContent>
       </Sheet>
