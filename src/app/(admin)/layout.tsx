@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import Header from "@/components/ui/header";
+import "../globals.css";
 import { AuthProvider } from "@/providers/auth";
 import Footer from "@/components/ui/footer";
-import CartProvider from "@/providers/cart";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FWS Store",
-  description: "A melhor loja de eletronicos do Brasil!",
+  title: "FWS Store Admin",
+  description: "Onde você controla a maior loja de eletronicos do Brasil!",
 };
 
 export default function RootLayout({
@@ -23,11 +21,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="flex h-full flex-col">
           <AuthProvider>
-            <CartProvider>
-              <Header />
-              <div className="flex-1">{children}</div>
-              <Footer />
-            </CartProvider>
+            <div className="flex-1">{children}</div>
+            <Footer />
           </AuthProvider>
         </div>
       </body>
