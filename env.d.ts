@@ -1,6 +1,7 @@
 declare namespace NodeJS {
   interface ProcessEnv {
-    DATABASE_URL: string;
+    POSTGRES_PRISMA_URL: string;
+    POSTGRES_URL_NON_POOLING: string;
     GOOGLE_CLIENT_ID: string;
     GOOGLE_CLIENT_SECRET: string;
     NEXT_PUBLIC_STRIPE_PUBLIC_KEY: string;
