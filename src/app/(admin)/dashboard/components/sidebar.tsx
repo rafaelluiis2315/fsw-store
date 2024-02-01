@@ -23,7 +23,7 @@ const Sidebar = () => {
         <Link href="/dashboard">
           <Button
             variant="outline"
-            className={`flex justify-start gap-2  
+            className={`flex w-full justify-start gap-2
             ${
               path.endsWith("/dashboard") &&
               "bg-primary text-white hover:bg-primary"
@@ -37,7 +37,7 @@ const Sidebar = () => {
         <Link href="/dashboard/products">
           <Button
             variant="outline"
-            className={`flex justify-start gap-2  
+            className={`flex w-full justify-start gap-2 
           ${
             path.includes("/products") &&
             "bg-primary text-white hover:bg-primary"
@@ -48,10 +48,20 @@ const Sidebar = () => {
             Produtos
           </Button>
         </Link>
-        <Button variant="outline" className="flex justify-start gap-2">
-          <ListOrderedIcon size={16} />
-          Categorias
-        </Button>
+        <Link href="/dashboard/categories">
+          <Button
+            variant="outline"
+            className={`flex w-full justify-start gap-2
+          ${
+            path.includes("/categories") &&
+            "bg-primary text-white hover:bg-primary"
+          }
+        `}
+          >
+            <ListOrderedIcon size={16} />
+            Categorias
+          </Button>
+        </Link>
         <Button variant="outline" className="flex justify-start gap-2">
           <PackageSearchIcon size={16} />
           Pedidos
