@@ -5,6 +5,10 @@ import { prismaClient } from "./prisma";
 
 export const authOptions: AuthOptions = {
     adapter: PrismaAdapter(prismaClient),
+    pages: {
+        signIn: "/auth/login",
+        newUser: "/auth/register",
+    },
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
