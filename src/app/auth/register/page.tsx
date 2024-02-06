@@ -2,9 +2,9 @@ import FormRegister from "./components/form-register";
 
 const RegisterPage = () => {
   return (
-    <h1>
-      Register User
-    </h1>
+    <div className="h-full items-center justify-center max-md:flex">
+      <FormRegister />
+    </div>
   );
 };
 
