@@ -11,7 +11,10 @@ const ProductList = ({ products }: ProductListProps) => {
       {products.map((product) => (
         <ProductItem
           key={product.id}
-          product={computeProductTotalPrice(product)}
+          product={{
+            ...product,
+            totalPrice: computeProductTotalPrice(product),
+          }}
           className="w-[9.75rem] lg:w-[12.5rem] lg:min-w-[12.5rem]"
         />
       ))}

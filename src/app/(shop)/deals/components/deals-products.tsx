@@ -10,13 +10,16 @@ const DealsProducts = async () => {
       },
     },
   });
-  
+
   return (
     <>
       {deals.map((product) => (
         <ProducItem
           key={product.id}
-          product={computeProductTotalPrice(product)}
+          product={{
+            ...product,
+            totalPrice: computeProductTotalPrice(product),
+          }}
         />
       ))}
     </>

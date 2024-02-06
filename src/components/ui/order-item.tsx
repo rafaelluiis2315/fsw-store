@@ -11,7 +11,7 @@ import OrderProductItem from "./order-product-item";
 import { Separator } from "@/components/ui/separator";
 import { useMemo } from "react";
 import { computeProductTotalPrice } from "@/helpers/product";
-import { getOrderStatus } from "../helpers/status";
+import { getOrderStatus } from "../../app/(shop)/orders/helpers/status";
 
 interface OrderItemProps {
   order: Prisma.OrderGetPayload<{
@@ -34,11 +34,9 @@ const OrderItem = ({ order }: OrderItemProps) => {
 
   const total = useMemo(() => {
     return order.orderProducts.reduce((acc, orderProduct) => {
-      const productWithTotalPrice = computeProductTotalPrice(
-        orderProduct.product,
-      );
+      const productTotalPrice = computeProductTotalPrice(orderProduct.product);
 
-      return acc + productWithTotalPrice.totalPrice * orderProduct.quantity;
+      return acc + productTotalPrice * orderProduct.quantity;
     }, 0);
   }, [order.orderProducts]);
 
