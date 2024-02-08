@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -15,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import ButtonWithLoading from "@/components/ui/button-with-loading";
 
 const registerSchema = z
   .object({
@@ -24,7 +24,7 @@ const registerSchema = z
     lastName: z.string().min(2, {
       message: "Segundo Nome deve ter no mínimo 2 caracteres.",
     }),
-    email: z.string().email({ message: "Invalid email." }),
+    email: z.string().email({ message: "E-mail inválido!" }),
     password: z
       .string()
       .min(6, {
@@ -61,13 +61,36 @@ const FormRegister = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof registerSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof registerSchema>) {
+    const res = await fetch("/api/register", {
+      method: "POST",
+      body: JSON.stringify({
+        name: `${values.firstName} ${values.lastName}`,
+        email: values.email,
+        password: values.password,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (res.ok) {
+      console.log("User registered");
+    } else {
+      await res.json().then((error) => {
+        form.setError(error.field, { message: error.message });
+      });
+    }
   }
+
   return (
     <Form {...form}>
+      {form.formState.errors.root && (
+        <FormMessage className="pb-5 text-center font-bold">
+          {form.formState.errors.root?.message}
+        </FormMessage>
+      )}
+
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
@@ -135,9 +158,8 @@ const FormRegister = () => {
                   <br />
                   3 - Deve conter pelo menos uma letra maiúscula e uma
                   minúscula.
-                  <br />
-                  4 - Deve conter pelo menos um caractere especial. (ex: @, #,
-                  $, %, !, &, *). <br />
+                  <br />4 - Deve conter pelo menos um caractere especial. (ex:
+                  @, #, $, %, !, &, *).
                 </FormDescription>
 
                 <FormMessage />
@@ -162,9 +184,11 @@ const FormRegister = () => {
         </div>
 
         <div className="mt-5 flex justify-center">
-          <Button type="submit" className="w-full font-bold md:w-[50%]">
-            Cadastrar
-          </Button>
+          <ButtonWithLoading
+            loading={form.formState.isSubmitting}
+            text="Cadastrar"
+            textWaiting="Cadastrando..."
+          />
         </div>
       </form>
     </Form>
