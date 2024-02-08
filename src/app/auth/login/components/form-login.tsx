@@ -11,6 +11,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
+import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 
 const registerSchema = z.object({
   email: z.string().email({ message: "Invalid email." }),
@@ -18,6 +20,9 @@ const registerSchema = z.object({
 });
 
 const FormLogin = () => {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
+  
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -26,8 +31,17 @@ const FormLogin = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof registerSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof registerSchema>) {
+    try {
+      const res = await signIn("custom", {
+        email: values.email,
+        password: values.password,
+        callbackUrl: callbackUrl,
+      });
+      
+    } catch (error) {
+      console.error("Failed to sign in: ", error);
+    }
   }
 
   return (
