@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../globals.css";
 import { AuthProvider } from "@/providers/auth";
-import Sidebar from "./dashboard/components/sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FWS Store Admin",
-  description: "Onde você controla a maior loja de eletronicos do Brasil!",
+  title: "FWS Store",
+  description: "A melhor loja de eletronicos do Brasil!",
 };
 
 export default function RootLayout({
@@ -19,10 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col items-center justify-center">
           <AuthProvider>
-            <div className="flex h-full">
-              <Sidebar />
+            <div className="h-full w-full bg-accent p-5 md:h-auto md:w-[50%] md:rounded-lg">
               {children}
             </div>
           </AuthProvider>
