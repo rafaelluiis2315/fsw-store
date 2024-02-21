@@ -19,12 +19,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex h-full flex-col">
+        <div className="flex h-full ">
           <AuthProvider>
-            <div className="flex h-full">
-              <Sidebar />
-              {children}
-            </div>
+            <Sidebar />
+            {children}
           </AuthProvider>
         </div>
       </body>
