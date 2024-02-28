@@ -6,6 +6,7 @@ import ProductsTable, {
   ProductWithTotalPriceAndCategory,
 } from "./components/product-table";
 import { computeProductTotalPrice } from "@/helpers/product";
+import ProductForm from "./components/product-form";
 
 const ProductsPage = async () => {
   const products = await prismaClient.product.findMany({
@@ -36,10 +37,7 @@ const ProductsPage = async () => {
           Produtos encontrados: {products.length}
         </p>
 
-        <Button className="flex gap-2">
-          <PlusIcon size={18} />
-          Adicionar produto
-        </Button>
+        <ProductForm/>
       </div>
 
       <ProductsTable products={productsWithTotalPriceAndCategory} />

@@ -76,6 +76,7 @@ const FormRegister = () => {
 
     if (res.ok) {
       console.log("User registered");
+      // TODO: Redirect to login page
     } else {
       await res.json().then((error) => {
         form.setError(error.field, { message: error.message });
