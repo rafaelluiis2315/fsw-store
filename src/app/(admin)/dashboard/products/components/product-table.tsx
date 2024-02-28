@@ -21,13 +21,23 @@ interface ProductsTableProps {
 const ProductsTable = ({ products }: ProductsTableProps) => {
   return (
     <Table>
-      <TableHeader>
+      <TableHeader className="bg-accent">
         <TableRow>
-          <TableHead>Nome</TableHead>
-          <TableHead>Categoria</TableHead>
-          <TableHead>Preço Total</TableHead>
-          <TableHead>Preço Base</TableHead>
-          <TableHead>Vendidos</TableHead>
+          <TableHead className="text-base font-bold text-current">
+            Nome
+          </TableHead>
+          <TableHead className="text-base font-bold text-current">
+            Categoria
+          </TableHead>
+          <TableHead className="text-base font-bold text-current">
+            Preço Total
+          </TableHead>
+          <TableHead className="text-base font-bold text-current">
+            Preço Base
+          </TableHead>
+          <TableHead className="text-base font-bold text-current">
+            Vendidos
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
