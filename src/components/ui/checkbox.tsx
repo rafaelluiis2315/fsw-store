@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import * as CheckboxPrimitive from "@radix-ui/react-checkbox";
 import { Check, Circle } from "lucide-react";
@@ -24,16 +22,22 @@ const checkboxVariants = cva(
 );
 
 export interface CheckboxProps
-  extends React.HTMLAttributes<HTMLInputElement>,
-    VariantProps<typeof checkboxVariants> {}
+  extends Omit<
+    React.ComponentProps<typeof CheckboxPrimitive.Root>,
+    "ref"
+  >,
+    VariantProps<typeof checkboxVariants> {
+  defaultChecked?: boolean;
+}
 
 const Checkbox = React.forwardRef<
   React.ElementRef<typeof CheckboxPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
->(({ className, variant, ...props }: CheckboxProps, ref) => (
+  CheckboxProps
+>(({ className, variant, defaultChecked, ...props }, ref) => (
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(checkboxVariants({ variant }), className)}
+    defaultChecked={defaultChecked}
     {...props}
   >
     <CheckboxPrimitive.Indicator
