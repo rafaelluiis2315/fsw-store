@@ -1,27 +1,25 @@
-import { error, timeStamp } from "console";
+"use server";
 
-interface CreateProductProps {
-    name: string;
-    image: File[];
-    category: string;
-    price: number;
-    hasDiscount: boolean;
-    discountPercentage?: number;
-    totalPrice?: string;
-}
-const createProduct = async (product: CreateProductProps) => {
+import { revalidatePath } from "next/cache";
+import { uploadImagesToS3 } from "./aws-s3";
+import { prismaClient } from "@/lib/prisma";
+
+export const createProduct = async (product: FormData) => {
     // Upload image to AWS S3
-
+    const imagesUrl = await uploadImagesToS3(product.getAll('images') as File[]);
+    
     // Create product in database
-    console.log(product);
+    await prismaClient.product.create({
+        data: {
+            name: product.get('name') as string,
+            slug: product.get('slug') as string,
+            description: product.get('description') as string,
+            imageUrls: imagesUrl,
+            categoryId: product.get('category') as string,
+            basePrice: Number(product.get('price')),
+            discountPercentage: Number(product.get('discountPercentage')),
+        }
+    })
 
-    return {
-        error: {
-            field: "root",
-            message: "Error message",
-        },
-        product,
-    }
-}
-
-export default createProduct;
+    revalidatePath('dashboard/products');
+};
