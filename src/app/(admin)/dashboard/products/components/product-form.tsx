@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -22,7 +23,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
+import { prismaClient } from "@/lib/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Category } from "@prisma/client";
 import { ArrowUpToLineIcon, PackageIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition } from "react";
@@ -67,7 +70,11 @@ const productSchema = z.object({
   totalPrice: z.string().optional(),
 });
 
-const ProductForm = () => {
+interface ProductFormProps {
+  categories: Category[];
+}
+
+const ProductForm = ({ categories }: ProductFormProps) => {
   const [pending, startTransition] = useTransition();
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const form = useForm<z.infer<typeof productSchema>>({
@@ -279,13 +286,32 @@ const ProductForm = () => {
                   control={form.control}
                   name="category"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="space-y-3">
                       <FormLabel>Categorias</FormLabel>
-
                       <FormControl>
-                        <Input {...field} />
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="grid w-full grid-cols-2 gap-2"
+                        >
+                          {categories.map((category) => (
+                            <FormItem
+                              key={category.id}
+                              className="flex items-center space-x-3 space-y-0"
+                            >
+                              <FormControl>
+                                <RadioGroupItem
+                                  className="border-none bg-accent"
+                                  value={category.id}
+                                />
+                              </FormControl>
+                              <FormLabel className="font-normal">
+                                {category.name}
+                              </FormLabel>
+                            </FormItem>
+                          ))}
+                        </RadioGroup>
                       </FormControl>
-
                       <FormMessage />
                     </FormItem>
                   )}

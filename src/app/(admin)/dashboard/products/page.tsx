@@ -19,6 +19,8 @@ const ProductsPage = async () => {
     },
   });
 
+  const categories = await prismaClient.category.findMany();
+
   const productsWithTotalPriceAndCategory: ProductWithTotalPriceAndCategory[] =
     products.map((product) => ({
       ...product,
@@ -37,7 +39,7 @@ const ProductsPage = async () => {
           Produtos encontrados: {products.length}
         </p>
 
-        <ProductForm/>
+        <ProductForm categories={categories} />
       </div>
 
       <ProductsTable products={productsWithTotalPriceAndCategory} />
