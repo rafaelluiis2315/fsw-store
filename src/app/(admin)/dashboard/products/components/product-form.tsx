@@ -1,6 +1,6 @@
 "use client";
 
-import createProduct from "@/actions/products";
+import { createProduct } from "@/actions/products";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import ButtonWithLoading from "@/components/ui/button-with-loading";
@@ -21,10 +21,11 @@ import {
   SheetHeader,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowUpToLineIcon, PackageIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -37,7 +38,15 @@ const productSchema = z.object({
     .max(50, {
       message: "Nome deve ter no máximo 50 caracteres.",
     }),
-  image: z
+  slug: z
+    .string()
+    .min(5, { message: "Slug deve ter no mínimo 5 caracteres." })
+    .max(20, { message: "Slug deve ter no máximo 50 caracteres." }),
+  description: z
+    .string()
+    .max(200, { message: "Descrição deve ter no máximo 200 caracteres." })
+    .optional(),
+  images: z
     .string({
       required_error: "Selecione ao menos 1 imagem.",
     })
@@ -59,6 +68,7 @@ const productSchema = z.object({
 });
 
 const ProductForm = () => {
+  const [pending, startTransition] = useTransition();
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
@@ -68,7 +78,7 @@ const ProductForm = () => {
   });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (form.getFieldState("image")?.error) return;
+    if (form.getFieldState("images")?.error) return;
 
     const files = event.target.files;
     if (files) {
@@ -76,7 +86,7 @@ const ProductForm = () => {
 
       imagesArray.forEach((file) => {
         if (file.size > 2 * 1024 * 1024) {
-          form.setError("image", {
+          form.setError("images", {
             message: "O tamanho da imagem não pode exceder 2MB.",
           });
           return;
@@ -118,22 +128,31 @@ const ProductForm = () => {
   };
 
   async function onSubmit(values: z.infer<typeof productSchema>) {
-    const { error, product } = await createProduct({
-      name: values.name,
-      image: selectedImages,
-      category: values.category,
-      price: values.price,
-      hasDiscount: values.hasDiscount,
-      discountPercentage: values.discountPercentage,
-      totalPrice: values.totalPrice,
-    });
+    const formUploud = new FormData();
 
-    if (error) {
-      console.error(error);
-      return;
+    formUploud.append("name", values.name);
+    formUploud.append("slug", values.slug);
+    selectedImages.forEach((image) => {
+      formUploud.append("images", image);
+    });
+    formUploud.append(
+      "description",
+      values.description ? values.description : "",
+    );
+    formUploud.append("category", values.category);
+    formUploud.append("price", values.price.toString());
+    if (values.hasDiscount) {
+      formUploud.append(
+        "discountPercentage",
+        values.discountPercentage ? values.discountPercentage.toString() : "0",
+      );
+      formUploud.append(
+        "totalPrice",
+        values.totalPrice ? values.totalPrice : "",
+      );
     }
 
-    console.log(product);
+    startTransition(() => createProduct(formUploud));
   }
 
   return (
@@ -144,7 +163,7 @@ const ProductForm = () => {
           Adicionar produto
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[21.875rem]">
+      <SheetContent className="w-[37.5rem]">
         <SheetHeader>
           <Badge variant="heading" className="flex gap-1">
             <PackageIcon size={18} />
@@ -165,6 +184,22 @@ const ProductForm = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nome</FormLabel>
+
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Slug</FormLabel>
 
                       <FormControl>
                         <Input {...field} />
@@ -197,7 +232,7 @@ const ProductForm = () => {
 
                 <FormField
                   control={form.control}
-                  name="image"
+                  name="images"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex w-full items-center justify-center gap-2 rounded-lg border py-2">
@@ -212,6 +247,26 @@ const ProductForm = () => {
                           multiple
                           {...field}
                           onChangeCapture={handleFileChange}
+                        />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição</FormLabel>
+
+                      <FormControl>
+                        <Textarea
+                          placeholder="Descreva o produto..."
+                          className="resize-none"
+                          {...field}
                         />
                       </FormControl>
 
@@ -322,6 +377,7 @@ const ProductForm = () => {
             </ScrollArea>
 
             <ButtonWithLoading
+              className="md:w-full"
               loading={form.formState.isSubmitting}
               text="Adicionar Produto"
               textWaiting="Criando Produto..."
