@@ -66,4 +66,16 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     @apply bg-primary rounded-[999px]
   }
+
+  .custom-scrollbar-accent::-webkit-scrollbar {
+    @apply w-[0.45rem]
+  }
+
+  .custom-scrollbar-accent::-webkit-scrollbar-track {
+    @apply bg-transparent
+  }
+
+  .custom-scrollbar-accent::-webkit-scrollbar-thumb {
+    @apply bg-accent rounded-[999px] min-h-[2rem]
+  }
 }

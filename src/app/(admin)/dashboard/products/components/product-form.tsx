@@ -1,8 +1,6 @@
 "use client";
 
 import { createProduct } from "@/actions/products";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import ButtonWithLoading from "@/components/ui/button-with-loading";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -16,21 +14,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { prismaClient } from "@/lib/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category } from "@prisma/client";
-import { ArrowUpToLineIcon, PackageIcon, PlusIcon } from "lucide-react";
+import { ArrowUpToLineIcon } from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { ProductWithTotalPriceAndCategory } from "./product-table";
 
 const productSchema = z.object({
   name: z
@@ -72,19 +64,38 @@ const productSchema = z.object({
 
 interface ProductFormProps {
   categories: Category[];
+  product?: ProductWithTotalPriceAndCategory;
 }
 
-const ProductForm = ({ categories }: ProductFormProps) => {
+const ProductForm = ({ categories, product }: ProductFormProps) => {
   const [pending, startTransition] = useTransition();
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedImages, setSelectedImages] = useState<File[] | string[]>(
+    product?.imageUrls || [],
+  );
+
+  const productDefaultValues = product
+    ? {
+        name: product.name,
+        slug: product.slug,
+        description: product.description,
+        hasDiscount: product.discountPercentage > 0,
+        category: product.categoryId,
+        price: Number(product.basePrice),
+        discountPercentage: product.discountPercentage,
+        totalPrice: `R$ ${product.totalPrice || 0},00`,
+      }
+    : {
+        hasDiscount: false,
+      };
+
   const form = useForm<z.infer<typeof productSchema>>({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      hasDiscount: false,
+      ...productDefaultValues,
     },
   });
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImagesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (form.getFieldState("images")?.error) return;
 
     const files = event.target.files;
@@ -163,171 +174,183 @@ const ProductForm = ({ categories }: ProductFormProps) => {
   }
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button className="flex gap-2">
-          <PlusIcon size={18} />
-          Adicionar produto
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="w-[37.5rem]">
-        <SheetHeader>
-          <Badge variant="heading" className="flex gap-1">
-            <PackageIcon size={18} />
-            Adicionar produto
-          </Badge>
-        </SheetHeader>
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="mt-2 flex h-[90%] w-full flex-col gap-2 overflow-hidden"
+      >
+        <ScrollArea className="h-[90%] w-full pr-6">
+          <div className="flex w-full flex-col gap-2">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nome</FormLabel>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-2 flex h-[90%] w-full flex-col gap-2 overflow-hidden"
-          >
-            <ScrollArea className="h-[90%] w-full">
-              <div className="flex w-full flex-col gap-2">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
 
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Slug</FormLabel>
 
-                <FormField
-                  control={form.control}
-                  name="slug"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Slug</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
 
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {selectedImages.length > 0 && (
-                  <div className="flex items-center justify-between gap-2">
-                    {selectedImages.map((image, index) => (
-                      <div
-                        key={index}
-                        className="flex h-[77px] w-[77px] items-center justify-center rounded-lg bg-accent"
-                      >
-                        <Image
-                          src={URL.createObjectURL(image)}
-                          alt={image.name}
-                          height={0}
-                          width={0}
-                          sizes="100vw"
-                          className="h-auto max-h-[70%] w-auto max-w-[80%]"
-                        />
-                      </div>
-                    ))}
+            {selectedImages.length > 0 && (
+              <div className="grid grid-cols-4 gap-2">
+                {selectedImages.map((image, index) => (
+                  <div
+                    key={index}
+                    className="flex h-[77px] w-[77px] items-center justify-center rounded-lg bg-accent"
+                  >
+                    <Image
+                      src={
+                        typeof image === "string"
+                          ? image
+                          : URL.createObjectURL(image)
+                      }
+                      alt={`Imagem ${index + 1}`}
+                      height={0}
+                      width={0}
+                      sizes="100vw"
+                      className="h-auto max-h-[70%] w-auto max-w-[80%]"
+                    />
                   </div>
-                )}
+                ))}
+              </div>
+            )}
 
-                <FormField
-                  control={form.control}
-                  name="images"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex w-full items-center justify-center gap-2 rounded-lg border py-2">
-                        <ArrowUpToLineIcon size={20} />
-                        Adicionar Imagem
-                      </FormLabel>
+            <FormField
+              control={form.control}
+              name="images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border py-2">
+                    <ArrowUpToLineIcon size={20} />
+                    Adicionar Imagem
+                  </FormLabel>
 
-                      <FormControl>
-                        <Input
-                          type="file"
-                          className="hidden"
-                          multiple
-                          {...field}
-                          onChangeCapture={handleFileChange}
-                        />
-                      </FormControl>
+                  <FormControl>
+                    <Input
+                      type="file"
+                      className="hidden"
+                      multiple
+                      {...field}
+                      onChangeCapture={handleImagesChange}
+                    />
+                  </FormControl>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Descrição</FormLabel>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
 
-                      <FormControl>
-                        <Textarea
-                          placeholder="Descreva o produto..."
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
+                  <FormControl>
+                    <Textarea
+                      className="custom-scrollbar-accent h-auto"
+                      placeholder="Descreva o produto..."
+                      {...field}
+                    />
+                  </FormControl>
 
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem className="space-y-3">
-                      <FormLabel>Categorias</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="grid w-full grid-cols-2 gap-2"
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Categorias</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="grid w-full grid-cols-2 gap-2"
+                    >
+                      {categories.map((category) => (
+                        <FormItem
+                          key={category.id}
+                          className="flex items-center space-x-3 space-y-0"
                         >
-                          {categories.map((category) => (
-                            <FormItem
-                              key={category.id}
-                              className="flex items-center space-x-3 space-y-0"
-                            >
-                              <FormControl>
-                                <RadioGroupItem
-                                  className="border-none bg-accent"
-                                  value={category.id}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {category.name}
-                              </FormLabel>
-                            </FormItem>
-                          ))}
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                          <FormControl>
+                            <RadioGroupItem
+                              className="border-none bg-accent"
+                              value={category.id}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {category.name}
+                          </FormLabel>
+                        </FormItem>
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Preço</FormLabel>
+
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="R$ 0,00"
+                      {...field}
+                      onChangeCapture={handleTotalPrice}
+                    />
+                  </FormControl>
+
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {form.getValues("hasDiscount") && (
+              <>
                 <FormField
                   control={form.control}
-                  name="price"
+                  name="discountPercentage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Preço</FormLabel>
+                      <FormLabel>Porcentagem de Desconto</FormLabel>
 
                       <FormControl>
                         <Input
                           type="number"
-                          placeholder="R$ 0,00"
+                          placeholder="0%"
                           {...field}
                           onChangeCapture={handleTotalPrice}
                         />
@@ -337,81 +360,58 @@ const ProductForm = ({ categories }: ProductFormProps) => {
                     </FormItem>
                   )}
                 />
-
-                {form.getValues("hasDiscount") && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name="discountPercentage"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Porcentagem de Desconto</FormLabel>
-
-                          <FormControl>
-                            <Input
-                              type="number"
-                              placeholder="0%"
-                              {...field}
-                              onChangeCapture={handleTotalPrice}
-                            />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="totalPrice"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Preço com Desconto</FormLabel>
-
-                          <FormControl>
-                            <Input placeholder="R$ 0,00" disabled {...field} />
-                          </FormControl>
-
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-
                 <FormField
                   control={form.control}
-                  name="hasDiscount"
+                  name="totalPrice"
                   render={({ field }) => (
                     <FormItem>
-                      <div className="flex items-center gap-1">
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                            variant="cicle"
-                          />
-                        </FormControl>
+                      <FormLabel>Preço com Desconto</FormLabel>
 
-                        <FormLabel>Produto com desconto</FormLabel>
-                      </div>
+                      <FormControl>
+                        <Input placeholder="R$ 0,00" disabled {...field} />
+                      </FormControl>
 
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-            </ScrollArea>
+              </>
+            )}
 
-            <ButtonWithLoading
-              className="md:w-full"
-              loading={form.formState.isSubmitting}
-              text="Adicionar Produto"
-              textWaiting="Criando Produto..."
+            <FormField
+              control={form.control}
+              name="hasDiscount"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center gap-1">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        variant="cicle"
+                      />
+                    </FormControl>
+
+                    <FormLabel>Produto com desconto</FormLabel>
+                  </div>
+
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </form>
-        </Form>
-      </SheetContent>
-    </Sheet>
+          </div>
+        </ScrollArea>
+
+        <div className="w-full pr-5">
+          <ButtonWithLoading
+            className="md:w-full"
+            loading={pending}
+            text={`${product ? "Editar" : "Adicionar"} Produto`}
+            textWaiting={`${product ? "Editando" : "Adicionando"} Produto...`}
+          />
+        </div>
+      </form>
+    </Form>
   );
 };
 

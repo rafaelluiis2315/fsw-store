@@ -1,12 +1,11 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { prismaClient } from "@/lib/prisma";
 import { PackageIcon, PlusIcon } from "lucide-react";
 import ProductsTable, {
   ProductWithTotalPriceAndCategory,
 } from "./components/product-table";
 import { computeProductTotalPrice } from "@/helpers/product";
-import ProductForm from "./components/product-form";
+import SidePanelProductForm from "./components/side-panel-product-form";
 
 const ProductsPage = async () => {
   const products = await prismaClient.product.findMany({
@@ -39,10 +38,13 @@ const ProductsPage = async () => {
           Produtos encontrados: {products.length}
         </p>
 
-        <ProductForm categories={categories} />
+        <SidePanelProductForm categories={categories} />
       </div>
 
-      <ProductsTable products={productsWithTotalPriceAndCategory} />
+      <ProductsTable
+        products={productsWithTotalPriceAndCategory}
+        categoryes={categories}
+      />
     </div>
   );
 };
