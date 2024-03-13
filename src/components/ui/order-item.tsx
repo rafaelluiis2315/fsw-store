@@ -47,31 +47,29 @@ const OrderItem = ({ order }: OrderItemProps) => {
       <Accordion type="single" className="w-full" collapsible>
         <AccordionItem value={order.id}>
           <AccordionTrigger>
-            <div className="flex w-full text-left">
-              <div className="flex flex-1 flex-col gap-1 text-left">
+            <div className="flex w-full justify-between text-left pr-5">
+              <div className="flex flex-col gap-1 text-left">
                 <p className="text-sm font-bold uppercase lg:text-base">
                   Pedido com {order.orderProducts.length} produto(s)
                 </p>
-                <span className="text-xs opacity-60">
-                  Feito em {format(order.createdAt, "d/MM/y 'às' HH:mm")}
-                </span>
+                <span className="text-xs opacity-60">#{order.id}</span>
               </div>
 
-              <div className="hidden flex-1 font-bold lg:block">
+              <div className="hidden font-bold lg:block">
                 <p className="text-xs lg:text-sm">Status</p>
                 <p className="text-xs text-[#8162FF] lg:text-sm">
                   {getOrderStatus(order.status)}
                 </p>
               </div>
 
-              <div className="hidden flex-1 lg:block">
+              <div className="hidden lg:block">
                 <p className="text-xs font-bold lg:text-sm ">Data</p>
                 <p className="text-xs opacity-60 lg:text-sm">
-                  {format(order.createdAt, "d/MM/y")}
+                  {format(order.createdAt, "dd/MM/y")}
                 </p>
               </div>
 
-              <div className="hidden flex-1 lg:block">
+              <div className="hidden lg:block">
                 <p className="text-xs font-bold lg:text-sm">Pagamento</p>
                 <p className="text-xs opacity-60 lg:text-sm">Cartão</p>
               </div>
