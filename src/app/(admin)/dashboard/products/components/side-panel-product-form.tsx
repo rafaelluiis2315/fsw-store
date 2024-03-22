@@ -15,12 +15,10 @@ import { ProductWithTotalPriceAndCategory } from "./product-table";
 import { useEffect, useState } from "react";
 
 interface SidePanelProductFormProps {
-  categories: Category[];
   product?: ProductWithTotalPriceAndCategory;
   setProductEdit?: (product: ProductWithTotalPriceAndCategory | null) => void;
 }
 const SidePanelProductForm = ({
-  categories,
   product,
   setProductEdit,
 }: SidePanelProductFormProps) => {
@@ -66,7 +64,7 @@ const SidePanelProductForm = ({
             {!product && "Adicionar"} produto
           </Badge>
         </SheetHeader>
-        <ProductForm categories={categories} product={product} />
+        <ProductForm product={product} />
       </SheetContent>
     </Sheet>
   );

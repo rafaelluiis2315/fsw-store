@@ -8,10 +8,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { ProductWithTotalPrice } from "@/helpers/product";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SidePanelProductForm from "./side-panel-product-form";
 import { Category } from "@prisma/client";
+import { getProductsPagination } from "@/actions/products";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export type ProductWithTotalPriceAndCategory = ProductWithTotalPrice & {
   category: {
@@ -20,11 +32,19 @@ export type ProductWithTotalPriceAndCategory = ProductWithTotalPrice & {
 };
 
 interface ProductsTableProps {
-  products: ProductWithTotalPriceAndCategory[];
-  categoryes: Category[];
+  page: number;
 }
 
-const ProductsTable = ({ products, categoryes }: ProductsTableProps) => {
+const ProductsTable = ({page}: ProductsTableProps) => {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace, refresh } = useRouter();
+
+  const [productList, setProductList] = useState<
+    ProductWithTotalPriceAndCategory[]
+  >([]);
+  const [totalPage, setTotalPage] = useState(0);
+
   const [productEdit, setProductEdit] =
     useState<ProductWithTotalPriceAndCategory | null>(null);
 
@@ -32,13 +52,36 @@ const ProductsTable = ({ products, categoryes }: ProductsTableProps) => {
     setProductEdit(product);
   };
 
+
+  const handlePagination = (page: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (page) {
+      params.set("page", page);
+    } else {
+      params.delete("page");
+    }
+    
+    replace(`${pathname}?${params.toString()}`);
+  };
+
+  useEffect(() => {
+    const handleProductsPagination = async () => {
+      const { productsWithTotalPriceAndCategory: products, totalPage } =
+        await getProductsPagination(page, 6);
+
+      setProductList(products);
+      setTotalPage(totalPage);
+    };
+
+    handleProductsPagination();
+  }, []);
+
   return (
     <>
       {productEdit && (
         <SidePanelProductForm
           product={productEdit}
           setProductEdit={setProductEdit}
-          categories={categoryes}
         />
       )}
       <Table>
@@ -62,7 +105,7 @@ const ProductsTable = ({ products, categoryes }: ProductsTableProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {products.map((product) => (
+          {productList.map((product) => (
             <TableRow
               key={product.id}
               onClick={() => handleEditProduct(product)}
@@ -80,6 +123,31 @@ const ProductsTable = ({ products, categoryes }: ProductsTableProps) => {
           ))}
         </TableBody>
       </Table>
+
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious href="#" />
+          </PaginationItem>
+          {Array.from({ length: totalPage }).map((_, index) => (
+            <PaginationItem key={index}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handlePagination(`${index + 1}`)}
+              >
+                {index + 1}
+              </Button>
+            </PaginationItem>
+          ))}
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationNext href="#5" />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </>
   );
 };

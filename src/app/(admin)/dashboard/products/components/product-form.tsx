@@ -19,10 +19,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Category } from "@prisma/client";
 import { ArrowUpToLineIcon } from "lucide-react";
 import Image from "next/image";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { ProductWithTotalPriceAndCategory } from "./product-table";
+import { getCategories } from "@/actions/category";
 
 const productSchema = z.object({
   name: z
@@ -63,15 +64,24 @@ const productSchema = z.object({
 });
 
 interface ProductFormProps {
-  categories: Category[];
   product?: ProductWithTotalPriceAndCategory;
 }
 
-const ProductForm = ({ categories, product }: ProductFormProps) => {
+const ProductForm = ({ product }: ProductFormProps) => {
   const [pending, startTransition] = useTransition();
   const [selectedImages, setSelectedImages] = useState<File[] | string[]>(
     product?.imageUrls || [],
   );
+  const [categories, setCategories] = useState<Category[]>();
+
+  useEffect(() => {
+    const handleCategories = async () => {
+      const categoryList = await getCategories();
+      setCategories(categoryList);
+    };
+
+    handleCategories();
+  },[]);
 
   const productDefaultValues = product
     ? {
@@ -294,7 +304,7 @@ const ProductForm = ({ categories, product }: ProductFormProps) => {
                       defaultValue={field.value}
                       className="grid w-full grid-cols-2 gap-2"
                     >
-                      {categories.map((category) => (
+                      {categories && categories.map((category) => (
                         <FormItem
                           key={category.id}
                           className="flex items-center space-x-3 space-y-0"

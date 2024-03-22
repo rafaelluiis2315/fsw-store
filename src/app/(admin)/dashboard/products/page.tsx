@@ -7,7 +7,13 @@ import ProductsTable, {
 import { computeProductTotalPrice } from "@/helpers/product";
 import SidePanelProductForm from "./components/side-panel-product-form";
 
-const ProductsPage = async () => {
+const ProductsPage = async ({
+  searchParams,
+}: {
+  searchParams?: {
+    page?: string;
+  };
+}) => {
   const products = await prismaClient.product.findMany({
     include: {
       category: {
@@ -18,13 +24,7 @@ const ProductsPage = async () => {
     },
   });
 
-  const categories = await prismaClient.category.findMany();
-
-  const productsWithTotalPriceAndCategory: ProductWithTotalPriceAndCategory[] =
-    products.map((product) => ({
-      ...product,
-      totalPrice: computeProductTotalPrice(product),
-    }));
+  const currentPage = Number(searchParams?.page) || 1;
 
   return (
     <div className="flex w-full flex-col gap-10 p-10">
@@ -38,13 +38,10 @@ const ProductsPage = async () => {
           Produtos encontrados: {products.length}
         </p>
 
-        <SidePanelProductForm categories={categories} />
+        <SidePanelProductForm />
       </div>
 
-      <ProductsTable
-        products={productsWithTotalPriceAndCategory}
-        categoryes={categories}
-      />
+      <ProductsTable page={currentPage} />
     </div>
   );
 };
