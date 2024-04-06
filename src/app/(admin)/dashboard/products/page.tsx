@@ -1,13 +1,19 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { prismaClient } from "@/lib/prisma";
 import { PackageIcon, PlusIcon } from "lucide-react";
 import ProductsTable, {
   ProductWithTotalPriceAndCategory,
 } from "./components/product-table";
 import { computeProductTotalPrice } from "@/helpers/product";
+import SidePanelProductForm from "./components/side-panel-product-form";
 
-const ProductsPage = async () => {
+const ProductsPage = async ({
+  searchParams,
+}: {
+  searchParams?: {
+    page?: string;
+  };
+}) => {
   const products = await prismaClient.product.findMany({
     include: {
       category: {
@@ -18,11 +24,7 @@ const ProductsPage = async () => {
     },
   });
 
-  const productsWithTotalPriceAndCategory: ProductWithTotalPriceAndCategory[] =
-    products.map((product) => ({
-      ...product,
-      totalPrice: computeProductTotalPrice(product),
-    }));
+  const currentPage = Number(searchParams?.page) || 1;
 
   return (
     <div className="flex w-full flex-col gap-10 p-10">
@@ -36,13 +38,10 @@ const ProductsPage = async () => {
           Produtos encontrados: {products.length}
         </p>
 
-        <Button className="flex gap-2">
-          <PlusIcon size={18} />
-          Adicionar produto
-        </Button>
+        <SidePanelProductForm />
       </div>
 
-      <ProductsTable products={productsWithTotalPriceAndCategory} />
+      <ProductsTable page={currentPage} />
     </div>
   );
 };
